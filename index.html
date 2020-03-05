@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<script src="app.js"></script>
+<script src="client.js"></script>
 
-All messages on display here
+<head>
+    <title>LPC</title>
+</head>
+<body>
+    <form name="chatInput">
+        <input type="text" name="message" />
+        <input type="submit" value="Send" />
+    </form>
+</body>
 
-<form name="publish">
-  <input type="text" name="message" />
-  <input type="submit" value="Send" />
-</form>
-
-<div id="messages">
+<div id="recievedMessages">
 </div>
 
 <script>
-    new Publish(document.forms.publish, 'publish');
-    new UpdateMessages(document.getElementById('messages'), 'subscribe?random=' + Math.random());
+    document.forms.chatInput.onSubmit = () => {
+        new POSTCall(document.forms.chatInput.message.value,'request');
+        document.forms.chatInput.message.value = '';
+        return false;
+    }
+    new LongPoll(document.getElementById('recievedMessages'), 'callServer?id=' + Math.random());
 </script>
