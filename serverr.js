@@ -4,9 +4,11 @@ let static = require('node-static');
 let fileServer = new static.Server('.');
 
 var http = require('http');
-
-function sendToAll() {
-
+var arr = [];
+function sendToAll(message) {
+    arr.forEach( (item,index) => {
+        item.end(message);
+    });
 }
 
 http.createServer(function (req, res) {
@@ -15,17 +17,19 @@ http.createServer(function (req, res) {
     if(parsedInfo.pathname == '/request' && parsedInfo.method == 'POST'){
         req.setEncoding('utf8');
         let message = '';
-        req.on('data', (chunk) => {
-            message += chunk;
+        req.on('data', (value) => {
+            message += value;
         }).on('end', function() {
             sendToAll(message); 
             res.end("ok");
         });
         return;
     }
-    if(parsedInfo.pathname == 'callServer'){
+    if(parsedInfo.pathname == '/callServer'){
         res.setHeader('Content-Type', 'text/plain;charset=utf-8');
         res.setHeader("Cache-Control", "no-cache, must-revalidate");
+        arr.insert(res);
+        console.log(arr);
         return;
     }
     fileServer.serve(req, res);
