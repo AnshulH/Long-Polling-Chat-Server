@@ -1,7 +1,46 @@
-const express = require('express')
-const app = express()
-const port = 3000
+const https = require('https');
 
-app.get('/', (req, res) => res.send(''))
+function PublishForm(form, url) {
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+  function sendMessage(message) {
+    fetch(url, {
+      method: 'POST',
+      body: message
+    });
+  }
+
+  form.onsubmit = function() {
+    let message = form.message.value;
+    if (message) {
+      form.message.value = '';
+      sendMessage(message);
+    }
+    return false;
+  };
+}
+
+function SubscribePane(elem, url) {
+
+  function showMessage(message) {
+    let messageElem = document.createElement('div');
+    messageElem.append(message);
+    elem.append(messageElem);
+  }
+
+  async function subscribe() {
+    let response = await fetch(url);
+
+    if (response.status == 502) {
+      await subscribe();
+    } else if (response.status != 200) {
+      showMessage(response.statusText);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await subscribe();
+    } else {
+      let message = await response.text();
+      showMessage(message);
+      await subscribe();
+    }
+  }
+  subscribe();
+}
